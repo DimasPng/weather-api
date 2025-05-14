@@ -31,4 +31,13 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
     {
         return Subscription::query()->where('confirmed', true)->get();
     }
+
+    public function findConfirmedByEmailAndCity(string $email, string $city): ?Subscription
+    {
+        return Subscription::query()
+            ->where('email', $email)
+            ->where('city', $city)
+            ->where('confirmed', true)
+            ->first();
+    }
 }
