@@ -71,6 +71,8 @@ services:
     tty: true
     networks:
       - mynetwork
+    ports:
+        - "5173:5173"
 volumes:
   mysql-data:
 networks:
