@@ -28,6 +28,8 @@ services:
       - 'host.docker.internal:host-gateway'
     networks:
       - mynetwork
+    depends_on:
+        -   mysql
     restart: unless-stopped
   php-scheduler:
     container_name: weather-app-scheduler
@@ -73,6 +75,14 @@ services:
       - mynetwork
     ports:
         - "5173:5173"
+  mailer:
+      image: mailhog/mailhog
+      restart: unless-stopped
+      ports:
+          - "1025:1025"
+          - "8082:8025"
+      networks:
+          - mynetwork
 volumes:
   mysql-data:
 networks:
