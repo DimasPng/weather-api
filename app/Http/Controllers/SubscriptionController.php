@@ -2,99 +2,70 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\CityNotFoundException;
+use App\Exceptions\SubscriptionNotFoundException;
 use App\Http\Requests\SubscribeRequest;
-use App\Mail\ConfirmSubscription;
-use App\Mail\UnsubscribeNotification;
-use App\Repositories\SubscriptionRepositoryInterface;
+use App\Services\SubscriptionService;
+use App\ValueObject\Token;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Str;
+use InvalidArgumentException;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class SubscriptionController
+readonly class SubscriptionController
 {
     public function __construct(
-        private readonly SubscriptionRepositoryInterface $subscriptionRepository
+        private SubscriptionService $subscriptionService,
     ) {}
 
     public function subscribe(SubscribeRequest $request): JsonResponse
     {
-        $existing = $this->subscriptionRepository->findConfirmedByEmailAndCity($request['email'], $request['city']);
-
-        if ($existing) {
-            return response()->json([
-                'message' => 'You are already subscribed to this city.',
-            ], Response::HTTP_CONFLICT);
-        }
-
-        $confirmToken = Str::uuid()->toString();
-        $unsubscribeToken = Str::uuid()->toString();
-
-        $subscription = $this->subscriptionRepository->create([
-            'email' => $request['email'],
-            'city' => $request['city'],
-            'frequency' => $request['frequency'],
-            'confirm_token' => $confirmToken,
-            'unsubscribe_token' => $unsubscribeToken,
-            'confirmed' => false,
-        ]);
-
         try {
-            Mail::to($subscription->email)->queue(new ConfirmSubscription($subscription));
-        } catch (\Throwable $e) {
-            Log::error('Mail send failed', ['error' => $e->getMessage()]);
+            $this->subscriptionService->create($request->validated());
 
             return response()->json([
-                'message' => 'Failed to send confirmation email.',
+                'message' => 'Subscription successful. Confirmation email sent.',
+            ], Response::HTTP_OK);
+        } catch (CityNotFoundException $e) {
+            return response()->json([
+                'message' => 'Invalid input.',
+                'errors' => $e->getMessage(),
+            ], Response::HTTP_BAD_REQUEST);
+        } catch (\Throwable $e) {
+            Log::error('Subscription failed', ['error' => $e->getMessage()]);
+
+            return response()->json([
+                'message' => 'An unexpected error occurred.',
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
-
-        return response()->json([
-            'message' => 'Subscription pending confirmation.',
-        ], Response::HTTP_OK);
     }
 
     public function confirm(string $token): JsonResponse
     {
-        $subscription = $this->subscriptionRepository->findByConfirmToken($token);
+        try {
+            $tkn = Token::fromString($token);
+            $this->subscriptionService->confirm($tkn);
 
-        if (! $subscription) {
-            return response()->json([
-                'message' => 'Invalid or expired token.',
-            ], Response::HTTP_NOT_FOUND);
+            return response()->json(['message' => 'Subscription confirmed successfully.'], Response::HTTP_OK);
+        } catch (InvalidArgumentException) {
+            return response()->json(['message' => 'Invalid token.'], Response::HTTP_BAD_REQUEST);
+        } catch (SubscriptionNotFoundException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
         }
-
-        $this->subscriptionRepository->update($subscription, [
-            'confirmed' => true,
-            'confirm_token' => null,
-        ]);
-
-        return response()->json([
-            'message' => 'Subscription confirmed.',
-        ], Response::HTTP_OK);
     }
 
     public function unsubscribe(string $token): JsonResponse
     {
-        $subscription = $this->subscriptionRepository->findByUnsubscribeToken($token);
-
-        if (! $subscription) {
-            return response()->json([
-                'message' => 'Invalid or expired token.',
-            ], Response::HTTP_NOT_FOUND);
-        }
-
-        $this->subscriptionRepository->update($subscription, ['confirmed' => false]);
-
         try {
-            Mail::to($subscription->email)->queue(new UnsubscribeNotification($subscription));
-        } catch (\Throwable $e) {
-            Log::error('Unsubscribe notification failed', ['error' => $e->getMessage()]);
-        }
+            $tkn = Token::fromString($token);
+            $this->subscriptionService->unsubscribe($tkn);
 
-        return response()->json([
-            'message' => 'Unsubscribed successfully.',
-        ], Response::HTTP_OK);
+            return response()->json(['message' => 'Unsubscribed successfully.'], Response::HTTP_OK);
+        } catch (InvalidArgumentException) {
+            return response()->json(['message' => 'Invalid token.'], Response::HTTP_BAD_REQUEST);
+        } catch (NotFoundHttpException $e) {
+            return response()->json(['message' => $e->getMessage()], Response::HTTP_NOT_FOUND);
+        }
     }
 }
