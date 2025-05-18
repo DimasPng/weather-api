@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
+use App\Enum\FrequencyEnum;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
  * @property string $email
  * @property string $city
- * @property string $frequency
+ * @property FrequencyEnum $frequency
  * @property bool $confirmed
- * @property string $confirm_token
- * @property string $unsubscribe_token
+ * @property string|null $confirmation_token
+ * @property string|null $unsubscribe_token
  * @property Carbon|null $last_sent_at
  */
 class Subscription extends Model
@@ -21,13 +22,14 @@ class Subscription extends Model
         'city',
         'frequency',
         'confirmed',
-        'confirm_token',
+        'confirmation_token',
         'unsubscribe_token',
         'last_sent_at',
     ];
 
     protected $casts = [
         'confirmed' => 'boolean',
+        'frequency' => FrequencyEnum::class,
         'last_sent_at' => 'datetime',
     ];
 }
