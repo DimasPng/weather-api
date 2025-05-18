@@ -2,10 +2,13 @@
 
 namespace App\Repositories;
 
+use App\Enum\FrequencyEnum;
 use App\Models\Subscription;
+use App\ValueObject\Token;
 use Illuminate\Support\Collection;
+use Illuminate\Support\LazyCollection;
 
-class SubscriptionRepository implements SubscriptionRepositoryInterface
+class SubscriptionRepository
 {
     public function create(array $data): Subscription
     {
@@ -17,27 +20,28 @@ class SubscriptionRepository implements SubscriptionRepositoryInterface
         return $sub->update($data);
     }
 
-    public function findByConfirmToken(string $token): ?Subscription
+    public function findByConfirmToken(Token $token): ?Subscription
     {
-        return Subscription::query()->where('confirm_token', $token)->first();
+        return Subscription::query()->where('confirmation_token', $token->getValue())->first();
     }
 
-    public function findByUnsubscribeToken(string $token): ?Subscription
+    public function findByUnsubscribeToken(Token $token): ?Subscription
     {
-        return Subscription::query()->where('unsubscribe_token', $token)->first();
+        return Subscription::query()->where('unsubscribe_token', $token->getValue())->first();
     }
 
-    public function findAllConfirmed(): Collection
-    {
-        return Subscription::query()->where('confirmed', true)->get();
-    }
-
-    public function findConfirmedByEmailAndCity(string $email, string $city): ?Subscription
+    public function findAllConfirmedByCity(string $city, FrequencyEnum $frequency): LazyCollection
     {
         return Subscription::query()
-            ->where('email', $email)
-            ->where('city', $city)
+            ->select(['id', 'email', 'unsubscribe_token'])
             ->where('confirmed', true)
-            ->first();
+            ->where('frequency', $frequency)
+            ->where('city', $city)
+            ->cursor();
+    }
+
+    public function getUniqueCities(): Collection
+    {
+        return Subscription::query()->select('city')->distinct()->get()->pluck('city');
     }
 }
