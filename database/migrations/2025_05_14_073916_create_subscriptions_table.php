@@ -10,16 +10,19 @@ return new class extends Migration
     {
         Schema::create('subscriptions', function (Blueprint $table) {
             $table->id();
-            $table->string('email')->index();
-            $table->string('city');
+            $table->string('email')->unique();
+            $table->string('city')->index();
             $table->enum('frequency', ['hourly', 'daily'])->default('daily');
             $table->boolean('confirmed')->default(false);
-            $table->string('confirmation_token')->unique();
-            $table->string('unsubscribe_token')->unique();
+            $table->string('confirmation_token')->unique()->nullable();
+            $table->string('unsubscribe_token')->unique()->nullable();
             $table->timestamp('last_sent_at')->nullable();
             $table->timestamps();
 
-            $table->unique(['email', 'city']);
+            $table->index(
+                ['city', 'frequency', 'confirmed'],
+                'subscriptions_city_frequency_confirmed_idx'
+            );
         });
     }
 
