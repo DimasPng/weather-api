@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Vue + Vuetify в Laravel</title>
+    <title>Weather</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 </head>
 <body>
