@@ -9,27 +9,23 @@ use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
 
-class ConfirmSubscription extends Mailable
+class ConfirmedSubscription extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public function __construct(public Subscription $sub) {}
+    public function __construct(public Subscription $subscription) {}
 
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Confirm your subscription',
+            subject: 'Subscription Confirmed',
         );
     }
 
     public function content(): Content
     {
         return new Content(
-            view: 'emails.confirm',
-            with: [
-                'confirmUrl' => url("/confirm/{$this->sub->confirmation_token}"),
-                'city' => $this->sub->city,
-            ]
+            markdown: 'emails.subscription_confirmed',
         );
     }
 
