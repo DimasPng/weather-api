@@ -4,7 +4,6 @@ namespace App\Listeners;
 
 use App\Events\WeatherUpdatedEvent;
 use App\Mail\WeatherUpdateMail;
-use Carbon\Carbon;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Support\Facades\Mail;
 

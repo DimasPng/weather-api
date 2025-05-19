@@ -9,9 +9,7 @@ use Illuminate\Support\Facades\Mail;
 
 class SendWelcomeMail implements ShouldQueue
 {
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function handle(SubscriptionCreatedEvent $event): void
     {

@@ -32,7 +32,6 @@ class WeatherApiClient
                 'humidity' => $data['current']['humidity'],
                 'description' => $data['current']['condition']['text'],
             ];
-
         } catch (\Exception $e) {
             return [
                 'error' => 'Unexpected error: '.$e->getMessage(),
@@ -60,7 +59,6 @@ class WeatherApiClient
             ]);
 
             return json_decode($response->getBody()->getContents(), true);
-
         } catch (ClientException $e) {
             $response = $e->getResponse();
             $body = json_decode($response->getBody()->getContents(), true);

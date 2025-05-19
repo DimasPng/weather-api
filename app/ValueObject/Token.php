@@ -4,13 +4,13 @@ namespace App\ValueObject;
 
 use Illuminate\Support\Str;
 
-readonly final class Token
+final readonly class Token
 {
     public function __construct(private string $token)
     {
-         if (! Str::isUuid($this->token)) {
-             throw new \InvalidArgumentException('Invalid token');
-         }
+        if (! Str::isUuid($this->token)) {
+            throw new \InvalidArgumentException('Invalid token');
+        }
     }
 
     public static function generate(): self

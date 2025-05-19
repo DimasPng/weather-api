@@ -9,10 +9,7 @@ use Illuminate\Support\Facades\Mail;
 
 class SendPostConfirmationEmailListener implements ShouldQueue
 {
-
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function handle(SubscriptionConfirmedEvent $event): void
     {

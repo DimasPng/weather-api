@@ -24,7 +24,7 @@ class DailyUpdateCommand extends Command
 
             $usersByCity = $subscriptionRepository->findAllConfirmedByCity($city, FrequencyEnum::DAILY);
 
-            $usersByCity->each(function (Subscription $user) use ($weather, $city) {
+            $usersByCity->each(function (Subscription $user) use ($weather) {
                 WeatherUpdatedEvent::dispatch($user, $weather);
             });
         });
