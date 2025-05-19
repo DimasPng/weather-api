@@ -6,8 +6,13 @@
 ## 🛠️ Getting Started
 
 ### 📥 Clone the Repository
+```
 
+```bash
 git clone https://github.com/DimasPng/weather-api
+```
+
+```bash
 cd weather-api
 ```
 
@@ -70,4 +75,4 @@ Once initialized, access the app via:
 - `resources/views/emails` – Email templates using Blade
 
 ---
-```
+
