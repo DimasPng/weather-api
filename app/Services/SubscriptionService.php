@@ -10,11 +10,11 @@ use App\Repositories\SubscriptionRepository;
 use App\ValueObject\Token;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-readonly class SubscriptionService
+class SubscriptionService
 {
     public function __construct(
-        private WeatherApiClient $weatherClient,
-        private SubscriptionRepository $subscriptionRepository,
+        private readonly WeatherApiClient $weatherClient,
+        private readonly SubscriptionRepository $subscriptionRepository,
     ) {}
 
     /**
