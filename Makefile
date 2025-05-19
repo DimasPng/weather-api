@@ -1,7 +1,7 @@
 init: docker-down-clear docker-pull docker-build docker-up api-init
 api-init: composer-install wait-db migrate db-fresh npm-install key-generate
 
-up: docker-up
+up: docker-up npm-dev
 down: docker-down validate
 bash: docker-bash
 
