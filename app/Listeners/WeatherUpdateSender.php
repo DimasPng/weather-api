@@ -16,7 +16,6 @@ class WeatherUpdateSender implements ShouldQueue
     {
         Mail::to($event->subscription->email)->send(new WeatherUpdateMail($event->subscription, $event->weather));
 
-        $event->subscription->last_sent_at = Carbon::now();
         $event->subscription->save();
     }
 }

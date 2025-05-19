@@ -16,7 +16,6 @@ return new class extends Migration
             $table->boolean('confirmed')->default(false);
             $table->string('confirmation_token')->unique()->nullable();
             $table->string('unsubscribe_token')->unique()->nullable();
-            $table->timestamp('last_sent_at')->nullable();
             $table->timestamps();
 
             $table->index(
