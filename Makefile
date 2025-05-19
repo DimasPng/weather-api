@@ -1,5 +1,6 @@
 init: docker-down-clear docker-pull docker-build docker-up api-init
-api-init: composer-install wait-db migrate db-fresh npm-install
+api-init: composer-install wait-db migrate db-fresh npm-install key-generate
+
 up: docker-up
 down: docker-down validate
 bash: docker-bash
@@ -34,11 +35,8 @@ migrate:
 db-fresh:
 	docker-compose run --rm php-fpm php artisan migrate:fresh --seed
 
-clear:
-	docker-compose run --rm php-fpm sh -c "php artisan view:clear && php artisan route:clear && php artisan config:clear && php artisan cache:clear"
-
-validate:
-	docker-compose run --rm php-fpm composer run validate
+key-generate:
+	docker-compose run --rm php-fpm php artisan key:generate
 
 npm-install:
 	docker-compose run --rm node npm install
@@ -48,3 +46,9 @@ npm-dev:
 
 npm-build:
 	docker-compose run --rm node npm run build
+
+clear:
+	docker-compose run --rm php-fpm sh -c "php artisan view:clear && php artisan route:clear && php artisan config:clear && php artisan cache:clear"
+
+validate:
+	docker-compose run --rm php-fpm composer run validate

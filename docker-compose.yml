@@ -64,6 +64,21 @@ services:
       retries: 3
       timeout: 5s
     restart: unless-stopped
+  queue:
+      build:
+          context: ./docker/app
+          args:
+              PUID: ${WWWUSER}
+              PGID: ${WWWGROUP}
+      volumes:
+          - .:/var/www/html
+      user: "1000:1000"
+      depends_on:
+          - mysql
+      networks:
+          - mynetwork
+      restart: unless-stopped
+      command: php artisan queue:work --verbose --tries=3 --timeout=90
   node:
     build:
       context: ./docker/node
@@ -75,6 +90,7 @@ services:
       - mynetwork
     ports:
         - "5173:5173"
+    command: npm run dev
   mailer:
       image: mailhog/mailhog
       restart: unless-stopped
